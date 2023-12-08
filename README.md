@@ -47,6 +47,9 @@ We have detailed steps and tasks for each project phase, including data acquisit
 ## Potential Pipeline
 ![DAG Visualization](./assets/dag.png)
 
+## HOW-TO
+To understand how to run the commands, please, refer to [the following guideline](/HOW-TO.md).
+
 ## Conclusion
 
 This project aims to provide comprehensive insights into scientific publications through robust data engineering and analytical techniques. Our process is designed for repeatability and scalability, accommodating incremental updates.
