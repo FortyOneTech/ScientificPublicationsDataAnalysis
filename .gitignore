@@ -25,6 +25,12 @@ share/python-wheels/
 .installed.cfg
 *.egg
 MANIFEST
+config/
+dags/
+data/
+logs/
+neo4j/
+plugins
 
 # PyInstaller
 #  Usually these files are written by a python script from a template
