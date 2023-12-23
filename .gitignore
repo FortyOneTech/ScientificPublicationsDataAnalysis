@@ -7,8 +7,13 @@ __pycache__/
 *.so
 
 # Distribution / packaging
+.DS_Store
+**/.DS_Store
 .Python
 build/
+dataset/
+*.json
+**/*.json
 develop-eggs/
 dist/
 downloads/
@@ -63,6 +68,7 @@ cover/
 
 # Django stuff:
 *.log
+*.zip
 local_settings.py
 db.sqlite3
 db.sqlite3-journal
@@ -127,9 +133,9 @@ celerybeat.pid
 
 # Environments
 .env
-# .venv
+.venv
 env/
-# venv/
+venv/
 ENV/
 env.bak/
 venv.bak/

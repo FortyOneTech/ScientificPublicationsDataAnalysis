@@ -3,6 +3,7 @@ from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
 import pandas as pd
+from dask import dataframe as dd
 import kaggle
 
 default_args = {
@@ -10,8 +11,8 @@ default_args = {
     'depends_on_past': False,
     'email_on_failure': False,
     'email_on_retry': False,
-    'retries': 1,
-    'retry_delay': timedelta(minutes=5),
+    'retries': 5,
+    'retry_delay': timedelta(minutes=0.5),
 }
 
 dag = DAG('arxiv_dataset_acquisition',
@@ -22,15 +23,17 @@ dag = DAG('arxiv_dataset_acquisition',
           catchup=False)
 
 def download_dataset():
-    os.system('kaggle datasets download -d Cornell-University/arxiv')
-    os.system('unzip arxiv.zip -d dataset')
+    if not os.path.exists('arxiv.zip'):
+        os.system('kaggle datasets download -d Cornell-University/arxiv')
+    if not os.path.exists('dataset/arxiv-metadata-oai-snapshot.json'):
+        os.system('unzip -o arxiv.zip -d dataset')
 
 def explore_dataset():
     # Data exploration code goes here
-    df = pd.read_csv('dataset/arxiv-metadata-oai-snapshot.json')
-    # Example: print dataset structure and summary
-    print(df.head())
-    print(df.describe())
+    blocks = dd.read_json('dataset/arxiv-metadata-oai-snapshot.json', lines=True, blocksize=1000)
+    for block in blocks:
+        print(block.head())
+        print(block.describe())
 
 download_task = PythonOperator(
     task_id='download_arxiv_dataset',

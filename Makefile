@@ -10,6 +10,9 @@ AIRFLOW_FIRSTNAME?=FortyOne
 AIRFLOW_LASTNAME?=Tech
 AIRFLOW_ROLE?=Admin
 
+clean:
+	rm -rf $(AIRFLOW_HOME) venv/ dataset/ *.zip
+
 # Create and activate virtual environment
 venv:
 	python3 -m venv $(VENV_NAME) # RUN: `source venv/bin/activate` to activate
@@ -21,7 +24,6 @@ install:
 # Initialize Airflow (database and folders)
 init-airflow:
 	$(VENV_NAME)/bin/airflow db init
-	mkdir -p $(AIRFLOW_HOME)/dags $(AIRFLOW_HOME)/logs $(AIRFLOW_HOME)/plugins
 
 # Create Airflow admin user
 create-admin-user:
@@ -35,6 +37,8 @@ create-admin-user:
 
 # Set Airflow home environment variable
 set-airflow-home:
+	mkdir -p $(AIRFLOW_HOME)/dags $(AIRFLOW_HOME)/logs $(AIRFLOW_HOME)/plugins
+	cp ./src/dags/*.py $(AIRFLOW_HOME)/dags
 	export AIRFLOW_HOME=$(AIRFLOW_HOME)
 
 # Set Kaggle API credentials permissions
@@ -43,9 +47,8 @@ set-kaggle-credentials:
 	cp ./assets/kaggle.json ~/.kaggle/
 	chmod 600 ~/.kaggle/kaggle.json
 
-# Copy DAGs
-cp-dags:
-	cp ./src/dags/*.py $(AIRFLOW_HOME)/dags
+# Default target
+init: install set-airflow-home init-airflow set-kaggle-credentials create-admin-user
 
 # Start Airflow webserver
 start-webserver:
@@ -54,9 +57,5 @@ start-webserver:
 # Start Airflow scheduler
 start-scheduler:
 	$(VENV_NAME)/bin/airflow scheduler
-
-# Default target
-init: install init-airflow set-airflow-home set-kaggle-credentials create-admin-user
-start: cp-dags start-webserver start-scheduler
 
 .PHONY: venv install init-airflow set-airflow-home set-kaggle-credentials start-webserver start-scheduler

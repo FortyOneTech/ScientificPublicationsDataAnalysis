@@ -12,6 +12,16 @@ This README provides instructions for setting up and managing an Apache Airflow 
 
 ## Setup
 
+### 0. Purge and Clean
+
+Before you do anything, make sure you purge and clean all the remnants remaining from the past runs.
+
+**Command:**
+
+```bash
+make clean
+```
+
 ### 1. Creating a Virtual Environment
 
 Before you start, you need to create a Python virtual environment which helps to keep dependencies required by different projects separate.
@@ -93,6 +103,18 @@ Copy your DAGs from the `src/dags` directory to the Airflow DAGs folder.
 make cp-dags
 ```
 
+## Default Commands
+
+### Initialize Everything
+
+To perform all initialization steps (install, initialize Airflow, set environment variables, set Kaggle credentials, and create an admin user) in one go:
+
+**Command:**
+
+```bash
+make init
+```
+
 ## Running Airflow
 
 ### 1. Starting the Airflow Webserver
@@ -109,7 +131,7 @@ By default, the webserver will be available at `http://localhost:8080`.
 
 ### 2. Starting the Airflow Scheduler
 
-Start the Airflow scheduler which orchestrates the execution of jobs.
+Open new tab with `Ctrl + T` and start the Airflow scheduler which orchestrates the execution of jobs after activating `venv`.
 
 **Command:**
 
@@ -117,30 +139,7 @@ Start the Airflow scheduler which orchestrates the execution of jobs.
 make start-scheduler
 ```
 
-## Default Commands
-
-### Initialize Everything
-
-To perform all initialization steps (install, initialize Airflow, set environment variables, set Kaggle credentials, and create an admin user) in one go:
-
-**Command:**
-
-```bash
-make init
-```
-
-### Start Everything
-
-To start both the webserver and the scheduler:
-
-**Command:**
-
-```bash
-make start
-```
-
 ## Note
-
-Ensure that you activate the virtual environment every time you open a new terminal session before running these `make` commands. 
-
-For more advanced usage and troubleshooting, refer to the official Apache Airflow documentation.
+1. Ensure that you activate the virtual environment every time you open a new terminal session before running these `make` commands. 
+2. Make sure you start both webserver and scheduler processes in two separate tabs.
+3. For more advanced usage and troubleshooting, refer to the official Apache Airflow documentation.

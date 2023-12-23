@@ -45,43 +45,30 @@
 # Feel free to modify this file to suit your needs.
 ---
 version: '3.8'
+
 x-airflow-common:
   &airflow-common
-  
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.7.1}
-  # build: .
+  image: smusali/airflow-custom:latest
   environment:
     &airflow-common-env
+    AIRFLOW_HOME: /usr/local/airflow
     AIRFLOW__CORE__EXECUTOR: CeleryExecutor
     AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
-    # For backward compatibility, with Airflow <2.3
-    AIRFLOW__CORE__SQL_ALCHEMY_CONN: postgresql+psycopg2://airflow:airflow@postgres/airflow
+    AIRFLOW__CELERY__WORKER_CONCURRENCY: 4
     AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://airflow:airflow@postgres/airflow
     AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
     AIRFLOW__CORE__FERNET_KEY: ''
     AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
     AIRFLOW__CORE__LOAD_EXAMPLES: 'true'
-    AIRFLOW__CORE__TEST_CONNECTION: 'Enabled' # Disabled by default, enabled for developing purposes
     AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
-    
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
-   
+    AIRFLOW_UID: "50000"
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
-    - ${AIRFLOW_PROJ_DIR:-.}/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
-    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
-    - ${AIRFLOW_PROJ_DIR:-.}/plugins:/opt/airflow/plugins
-    - ${AIRFLOW_PROJ_DIR:-.}/data:/tmp/data
-    - ${AIRFLOW_PROJ_DIR:-.}/data:/data
-    
+    - ./dags:/usr/local/airflow/dags
+    - ./logs:/usr/local/airflow/logs
+    - ./plugins:/usr/local/airflow/plugins
   user: "${AIRFLOW_UID:-50000}:0"
-  depends_on:
-    &airflow-common-depends-on
-    redis:
-      condition: service_healthy
-    postgres:
-      condition: service_healthy
 
 services:
   postgres:
@@ -100,9 +87,9 @@ services:
     restart: always
     ports:
       - 5432:5432
-                                                                                                                                                                                       
+
   pgadmin:
-    container_name: pgadmin_project
+    container_name: airflow_pgadmin_project
     image: dpage/pgadmin4:6.13
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@pgadmin.com # the email
@@ -124,33 +111,39 @@ services:
 
   airflow-webserver:
     <<: *airflow-common
-    command: webserver
+    command: airflow webserver -p 8080 --workers 4 --worker-class gthread
     ports:
       - "8080:8080"
+    restart: always
     healthcheck:
       test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 5
       start_period: 30s
-    restart: always
     depends_on:
-      <<: *airflow-common-depends-on
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
 
   airflow-scheduler:
     <<: *airflow-common
-    command: scheduler
-    healthcheck:
-      test: ["CMD", "curl", "--fail", "http://localhost:8974/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
+    command: airflow scheduler
     restart: always
+    healthcheck:
+      test: ["CMD", "airflow", "jobs", "check", "--job-type", "SchedulerJob", "--hostname", "$${HOSTNAME}"]
+      interval: 60s
+      timeout: 30s
+      retries: 3
+      start_period: 60s
     depends_on:
-      <<: *airflow-common-depends-on
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
 
@@ -173,7 +166,10 @@ services:
       DUMB_INIT_SETSID: "0"
     restart: always
     depends_on:
-      <<: *airflow-common-depends-on
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
 
@@ -188,7 +184,10 @@ services:
       start_period: 30s
     restart: always
     depends_on:
-      <<: *airflow-common-depends-on
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
 
@@ -301,7 +300,10 @@ services:
       start_period: 30s
     restart: always
     depends_on:
-      <<: *airflow-common-depends-on
+      redis:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
       airflow-init:
         condition: service_completed_successfully
   
