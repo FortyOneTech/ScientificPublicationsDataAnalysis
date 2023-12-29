@@ -2,9 +2,9 @@ import os
 from airflow import DAG
 from airflow.operators.python_operator import PythonOperator
 from datetime import datetime, timedelta
-import pandas as pd
-from dask import dataframe as dd
-import kaggle
+# import pandas as pd
+# from dask import dataframe as dd
+# import kaggle
 
 default_args = {
     'owner': 'airflow',
@@ -28,12 +28,14 @@ def download_dataset():
     if not os.path.exists('dataset/arxiv-metadata-oai-snapshot.json'):
         os.system('unzip -o arxiv.zip -d dataset')
 
+'''
 def explore_dataset():
     # Data exploration code goes here
     blocks = dd.read_json('dataset/arxiv-metadata-oai-snapshot.json', lines=True, blocksize=1000)
     for block in blocks:
         print(block.head())
         print(block.describe())
+'''
 
 download_task = PythonOperator(
     task_id='download_arxiv_dataset',
@@ -41,10 +43,12 @@ download_task = PythonOperator(
     dag=dag,
 )
 
+'''
 explore_task = PythonOperator(
     task_id='explore_arxiv_dataset',
     python_callable=explore_dataset,
     dag=dag,
 )
+'''
 
-download_task >> explore_task
+download_task# >> explore_task
