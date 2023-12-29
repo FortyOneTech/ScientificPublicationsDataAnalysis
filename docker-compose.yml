@@ -18,10 +18,13 @@ x-airflow-common:
     AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
     AIRFLOW_UID: "50000"
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
+    # Enable more verbose logging if needed
+    # AIRFLOW__LOGGING__LOGGING_LEVEL: 'DEBUG'
+    AIRFLOW__LOGGING__BASE_LOG_FOLDER: /usr/local/airflow/logs
+    AIRFLOW__LOGGING__LOGGING_LEVEL: 'INFO'
   volumes:
-    - ./dags:/usr/local/airflow/dags
-    - ./logs:/usr/local/airflow/logs
-    - ./plugins:/usr/local/airflow/plugins
+    - ./src/dags:/usr/local/airflow/dags
+    - ./logs:/usr/local/airflow/logs  # Shared log volume
   user: "${AIRFLOW_UID:-50000}:0"
 
 services:
@@ -31,6 +34,8 @@ services:
       POSTGRES_USER: airflow
       POSTGRES_PASSWORD: airflow
       POSTGRES_DB: airflow
+      # Custom configuration for PostgreSQL to handle lock timeouts
+      POSTGRES_INITDB_ARGS: "--lock-timeout=120s"
     volumes:
       - postgres-db-volume:/var/lib/postgresql/data
     healthcheck:
@@ -153,3 +158,4 @@ services:
 
 volumes:
   postgres-db-volume:
+  logs:  # Define a volume for logs

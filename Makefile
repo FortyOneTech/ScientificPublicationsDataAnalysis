@@ -11,7 +11,8 @@ AIRFLOW_LASTNAME?=Tech
 AIRFLOW_ROLE?=Admin
 
 clean:
-	rm -rf $(AIRFLOW_HOME) venv/ dataset/ *.zip
+	rm -rf $(AIRFLOW_HOME) venv/ dataset/ *.zip *.json logs/ neo4j/ plugins/ dags/ notebooks/.ipynb_checkpoints/
+	rm -rf $(AIRFLOW_HOME) notebooks/logs/ notebooks/neo4j/ notebooks/plugins/ notebooks/dags/ notebooks/config/ notebooks/data/
 
 # Create and activate virtual environment
 venv:
