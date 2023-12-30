@@ -11,7 +11,7 @@ default_args = {
     'retry_delay': timedelta(minutes=0.5),
 }
 
-dag = DAG('create_dwh_tables_arxiv',
+dag = DAG('create_dwh_tables_paper',
           default_args=default_args,
           description='Create tables in PostgreSQL for arXiv dataset',
           schedule_interval='@once',
@@ -59,8 +59,8 @@ CREATE TABLE IF NOT EXISTS dim_details (
 );
 """
 
-create_arxiv_fact_table = """
-CREATE TABLE IF NOT EXISTS fact_arxiv (
+create_paper_fact_table = """
+CREATE TABLE IF NOT EXISTS fact_paper (
     id SERIAL PRIMARY KEY,
     author_ids INT[],
     publication_id INT,
@@ -108,14 +108,14 @@ create_details_dim_task = PostgresOperator(
     dag=dag,
 )
 
-create_arxiv_fact_task = PostgresOperator(
-    task_id='create_arxiv_fact',
+create_paper_fact_task = PostgresOperator(
+    task_id='create_paper_fact',
     postgres_conn_id='postgres_default',
-    sql=create_arxiv_fact_table,
+    sql=create_paper_fact_table,
     dag=dag,
 )
 
 # Set task dependencies
 create_author_dim_task >> create_publication_dim_task >> create_category_dim_task
 create_category_dim_task >> create_submission_dim_task >> create_details_dim_task
-create_details_dim_task >> create_arxiv_fact_task
+create_details_dim_task >> create_paper_fact_task

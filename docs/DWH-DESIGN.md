@@ -4,11 +4,11 @@
 
 This document outlines the design of a Data Warehouse (DWH) schema for the arXiv dataset, employing a Star Schema model tailored for a PostgreSQL RDBMS. The design aims to organize the dataset into a central fact table and associated dimension tables, enabling efficient data analysis and query processing.
 
-## Fact Table: arXiv
+## Fact Table: Paper
 
-The arXiv table is the core of this DWH schema, containing the transactional metadata of each paper in the dataset:
+The Paper table is the core of this DWH schema, containing the transactional metadata of each paper in the dataset:
 
-- **id (Primary Key)**: The unique ArXiv ID assigned to each paper.
+- **id (Primary Key)**: The unique arXiv ID assigned to each paper.
 - **author_ids**: Foreign Keys linking to the Author dimension table (as there can be multiple authors for a paper, this could be an array of author_id or a similar structure).
 - **publication_id**: Foreign Key linking to the Publication dimension table.
 - **category_ids**: Foreign Keys linking to the Category dimension table (since a paper can have multiple categories, this could be an array of category_id or similar).
@@ -23,8 +23,7 @@ Dimension tables store descriptive attributes, providing context to the data in 
 
 ### Dimension: Author
 - **author_id (Primary Key)**: A unique identifier for each author.
-- **author**: Name of the author (derived from the authors field).
-- **author_parsed**: Structured format of the author's name (derived from authors_parsed).
+- **author_parsed**: Structured format of the author's name (derived from `authors_parsed` and `authors` fields).
 
 ### Dimension: Publication
 - **publication_id (Primary Key)**: A unique identifier for each publication.
@@ -33,12 +32,12 @@ Dimension tables store descriptive attributes, providing context to the data in 
 
 ### Dimension: Category
 - **category_id (Primary Key)**: A unique identifier for each category.
-- **category**: Specific category name (derived from categories).
+- **category**: Specific category name (derived from `categories`).
 
 ### Dimension: Submission
 - **submission_id (Primary Key)**: A unique identifier for each submission.
 - **submitter**: Individual who submitted the paper.
-- **submission_date**: Date of submission (derived from update_date).
+- **submission_date**: Date of submission (derived from `update_date`).
 
 ### Dimension: Details
 - **detail_id (Primary Key)**: A unique identifier for each set of paper details.
@@ -48,7 +47,7 @@ Dimension tables store descriptive attributes, providing context to the data in 
 
 ## Relationships
 
-Each record in the arXiv table is linked to the dimension tables via foreign keys. The id field in arXiv serves as a reference to associate each paper with corresponding records in dimension tables like Author, Publication, Category, Submission, and Details.
+Each record in the Paper table is linked to the dimension tables via foreign keys. The id field in Paper serves as a reference to associate each paper with corresponding records in dimension tables like Author, Publication, Category, Submission, and Details.
 
 ![DWH Design Visualization](../assets/dwh_design.png)
 
